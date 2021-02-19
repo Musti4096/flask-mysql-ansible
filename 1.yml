@@ -1,0 +1,58 @@
+-
+  name: Deploy a web application
+  hosts: webserver
+  vars:                       # we define some variables here, and use in our tasks.
+    db_name: "myfirst_db"
+    db_user: "mustafa"
+    db_password: "123456"
+  tasks:
+    - name: Install dependencies      #In this part, we install python dependencies
+      apt: 
+        name: "{{ item }}"
+        state: present
+      with_items:
+       - python
+       - python-setuptools
+       - python-dev
+       - build-essential
+       - python-pip
+       - python-mysqldb
+
+    - name: Install MySQL database  
+      apt:
+        name: "{{ item }}"
+        state:  present
+      with_items:
+       - mysql-server
+       - mysql-client
+
+    - name: Start Mysql Service
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Create Application Database
+      mysql_db: name={{ db_name }} state=present
+
+    - name: Create Application DB User
+      mysql_user: name={{ db_user }} password={{ db_password }} priv='*.*:ALL' host='%' state='present'
+
+    - name: Install Python Flask dependencies
+      pip:
+        name: '{{ item }}'
+        state: present
+      with_items:
+       - flask
+       - flask-mysql
+    - name: Start web-application
+      shell: mkdir /home/ubuntu/templates
+
+    - name: Copy web-server code
+      copy: src=app.py dest=/home/ubuntu/app.py
+    
+    - name: Copy web-server code
+      copy: src=templates/index.html dest=/home/ubuntu/templates/index.html
+
+    - name: Start web-application
+      shell: FLASK_APP=/home/ubuntu/app.py nohup flask run

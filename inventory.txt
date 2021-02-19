@@ -1,0 +1,1 @@
+webserver ansible_host=107.21.63.224 ansible_connection=ssh ansible_user=ubuntu ansible_ssh_private_key_file=./mustafa.pem
